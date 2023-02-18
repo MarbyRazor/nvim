@@ -31,6 +31,3 @@ vim.opt.signcolumn = 'yes'
 
 -- Give more space for displaying messages.
 vim.opt.cmdheight = 1
-
--- I like to use only the system clipboard
-vim.opt.clipboard = 'unnamedplus'
