@@ -31,3 +31,4 @@ vim.opt.signcolumn = 'yes'
 
 -- Give more space for displaying messages.
 vim.opt.cmdheight = 1
+vim.opt.maxmempattern = 2000
