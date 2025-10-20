@@ -25,6 +25,7 @@ vim.pack.add({
 
 require "mason".setup()
 require "mini.pick".setup()
+require "mini.diff".setup()
 require "mini.bufremove".setup()
 require "oil".setup()
 
@@ -68,9 +69,12 @@ map('n', '<leader>o', ':update<CR> :source <CR>')
 map('i', 'jk', '<ESC>')
 
 map('n', '<leader>lf', vim.lsp.buf.format)
+
 map('n', '<leader>f', "<Cmd>Pick files<CR>")
-map('n', '<leader>r', "<Cmd>Pick buffers<CR>")
+map('n', '<leader>b', "<Cmd>Pick buffers<CR>")
 map('n', '<leader>h', "<Cmd>Pick help<CR>")
+map('n', '<leader>g', "<Cmd>Pick grep_live<CR>")
+
 map('n', '<leader>e', "<Cmd>Oil<CR>")
 map('i', '<c-e>', function() vim.lsp.completion.get() end)
 
@@ -78,3 +82,6 @@ map("n", "<M-n>", "<cmd>resize +2<CR>")          -- Increase height
 map("n", "<M-e>", "<cmd>resize -2<CR>")          -- Decrease height
 map("n", "<M-i>", "<cmd>vertical resize +5<CR>") -- Increase width
 map("n", "<M-m>", "<cmd>vertical resize -5<CR>") -- Decrease width
+
+map('n', '<leader>n', ':cnext<CR>', { noremap = true, silent = true })
+map('n', '<leader>p', ':cprev<CR>', { noremap = true, silent = true })
