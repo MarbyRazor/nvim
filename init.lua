@@ -40,7 +40,7 @@ vim.lsp.enable(
 	{
 		"lua_ls",
 		"pyright",
-		"terraform-ls",
+		"terraformls",
 	}
 )
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
@@ -144,3 +144,9 @@ map("n", "<M-m>", "<cmd>vertical resize -5<CR>") -- Decrease width
 
 map('n', '<leader>n', ':cnext<CR>', { noremap = true, silent = true })
 map('n', '<leader>p', ':cprev<CR>', { noremap = true, silent = true })
+
+-- Cover my mistakes for quitting nivm
+vim.api.nvim_create_user_command("Q","q", {bang = true})
+vim.api.nvim_create_user_command("W","w", {bang = true})
+vim.api.nvim_create_user_command("WQ","wq", {bang = true})
+vim.api.nvim_create_user_command("Wq","wq", {bang = true})
