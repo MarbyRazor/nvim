@@ -14,7 +14,7 @@ vim.opt.undofile = true
 vim.opt.signcolumn = "yes"
 
 vim.pack.add({
-	{ src = "https://github.com/stevearc/oil.nvim" },
+	-- { src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/echasnovski/mini.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 	{ src = "https://github.com/chomosuke/typst-preview.nvim" },
@@ -32,27 +32,79 @@ require "mini.completion".setup()
 require "mini.pairs".setup()
 require "mini.comment".setup()
 require "mini.surround".setup()
-require "oil".setup()
+require "mini.extra".setup()
+-- require "oil".setup()
 
 -- LSP
 vim.lsp.enable(
 	{
 		"lua_ls",
 		"pyright",
+		"terraform-ls",
 	}
 )
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
-vim.api.nvim_create_autocmd('LspAttach', {
-	group = vim.api.nvim_create_augroup('my.lsp', {}),
-	callback = function(args)
-		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+local keymap = vim.keymap -- for conciseness
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+	callback = function(ev)
+		local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
 		if client:supports_method('textDocument/completion') then
 			-- Optional: trigger autocompletion on EVERY keypress. May be slow!
 			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
 			client.server_capabilities.completionProvider.triggerCharacters = chars
-			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
+			vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
 		end
+
+		-- Buffer local mappings.
+		-- See `:help vim.lsp.*` for documentation on any of the below functions
+		local opts = { buffer = ev.buf, silent = true }
+
+		-- set keybinds
+		opts.desc = "Show LSP references"
+		-- keymap.set("n", "gR", "<cmd>MiniExtra.pickers.lsp({ scope = 'references' })<CR>", opts) -- show definition, references
+		keymap.set("n", "gR", "<cmd>Pick lsp scope='references'<CR>", opts) -- show definition, references
+
+		opts.desc = "Go to declaration"
+		keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
+
+		opts.desc = "Show LSP definition"
+		keymap.set("n", "gd", vim.lsp.buf.definition, opts) -- show lsp definition
+
+		opts.desc = "Show LSP implementations"
+		keymap.set("n", "gi", "<cmd>Pick lsp scope='implementation'<CR>", opts) -- show lsp implementations
+
+		opts.desc = "Show LSP type definitions"
+		keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
+
+		opts.desc = "See available code actions"
+		keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
+
+		opts.desc = "Smart rename"
+		keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
+
+		-- opts.desc = "Show buffer diagnostics"
+		-- keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts) -- show  diagnostics for file
+
+		opts.desc = "Show line diagnostics"
+		keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
+
+		opts.desc = "Go to previous diagnostic"
+		keymap.set("n", "[d", function()
+			vim.diagnostic.jump({ count = -1, float = true })
+		end, opts) -- jump to previous diagnostic in buffer
+		--
+		opts.desc = "Go to next diagnostic"
+		keymap.set("n", "]d", function()
+			vim.diagnostic.jump({ count = 1, float = true })
+		end, opts) -- jump to next diagnostic in buffer
+
+		opts.desc = "Show documentation for what is under cursor"
+		keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+
+		opts.desc = "Restart LSP"
+		keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
 	end,
 })
 
