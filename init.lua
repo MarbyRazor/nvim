@@ -50,11 +50,31 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("UserLspConfig", {}),
 	callback = function(ev)
 		local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+
+		if client:supports_method('textDocument/implementation') then
+			-- Create a keymap for vim.lsp.buf.implementation ...
+		end
+
+		-- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
 		if client:supports_method('textDocument/completion') then
 			-- Optional: trigger autocompletion on EVERY keypress. May be slow!
-			local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-			client.server_capabilities.completionProvider.triggerCharacters = chars
+			-- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+			-- client.server_capabilities.completionProvider.triggerCharacters = chars
+
 			vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+		end
+
+		-- Auto-format ("lint") on save.
+		-- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+		if not client:supports_method('textDocument/willSaveWaitUntil')
+				and client:supports_method('textDocument/formatting') then
+			vim.api.nvim_create_autocmd('BufWritePre', {
+				group = vim.api.nvim_create_augroup('my.lsp', { clear = false }),
+				buffer = ev.buf,
+				callback = function()
+					vim.lsp.buf.format({ bufnr = ev.buf, id = client.id, timeout_ms = 1000 })
+				end,
+			})
 		end
 
 		-- Buffer local mappings.
@@ -129,10 +149,12 @@ map('i', 'jk', '<ESC>')
 
 map('n', '<leader>lf', vim.lsp.buf.format)
 
-map('n', '<leader>f', "<Cmd>Pick files<CR>")
-map('n', '<leader>b', "<Cmd>Pick buffers<CR>")
-map('n', '<leader>h', "<Cmd>Pick help<CR>")
-map('n', '<leader>g', "<Cmd>Pick grep_live<CR>")
+map('n', '<leader>sf', "<Cmd>Pick files<CR>")
+map('n', '<leader>sb', "<Cmd>Pick buffers<CR>")
+map('n', '<leader>sh', "<Cmd>Pick help<CR>")
+map('n', '<leader>sg', "<Cmd>Pick grep_live<CR>")
+map('n', '<leader>sk', "<Cmd>Pick keymaps<CR>")
+map('n', '<leader>se', "<Cmd>Pick explorer<CR>")
 
 map('n', '<leader>e', "<Cmd>Oil<CR>")
 map('i', '<c-e>', function() vim.lsp.completion.get() end)
@@ -146,7 +168,7 @@ map('n', '<leader>n', ':cnext<CR>', { noremap = true, silent = true })
 map('n', '<leader>p', ':cprev<CR>', { noremap = true, silent = true })
 
 -- Cover my mistakes for quitting nivm
-vim.api.nvim_create_user_command("Q","q", {bang = true})
-vim.api.nvim_create_user_command("W","w", {bang = true})
-vim.api.nvim_create_user_command("WQ","wq", {bang = true})
-vim.api.nvim_create_user_command("Wq","wq", {bang = true})
+vim.api.nvim_create_user_command("Q", "q", { bang = true })
+vim.api.nvim_create_user_command("W", "w", { bang = true })
+vim.api.nvim_create_user_command("WQ", "wq", { bang = true })
+vim.api.nvim_create_user_command("Wq", "wq", { bang = true })
