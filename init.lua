@@ -20,14 +20,28 @@ vim.pack.add({
 	{ src = "https://github.com/chomosuke/typst-preview.nvim" },
 	{ src = 'https://github.com/neovim/nvim-lspconfig' },
 	{ src = "https://github.com/mason-org/mason.nvim" },
-	{ src = "https://github.com/L3MON4D3/LuaSnip" },
 })
 
 require "mason".setup()
 require "mini.pick".setup()
 require "mini.diff".setup()
 require "mini.bufremove".setup()
+require "mini.icons".setup()
+require "mini.snippets".setup()
+require "mini.completion".setup()
+require "mini.pairs".setup()
+require "mini.comment".setup()
+require "mini.surround".setup()
 require "oil".setup()
+
+-- LSP
+vim.lsp.enable(
+	{
+		"lua_ls",
+		"pyright",
+	}
+)
+vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
 vim.api.nvim_create_autocmd('LspAttach', {
 	group = vim.api.nvim_create_augroup('my.lsp', {}),
@@ -47,19 +61,6 @@ vim.diagnostic.config({
 		current_line = true,
 	},
 })
-
--- LSP
-vim.lsp.enable(
-	{
-		"lua_ls",
-	}
-)
-vim.cmd [[set completeopt+=menuone,noselect,popup]]
-
--- snippets
-require("luasnip").setup({ enable_autosnippets = true })
-require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
-local ls = require("luasnip")
 
 -- mappings
 local map = vim.keymap.set
